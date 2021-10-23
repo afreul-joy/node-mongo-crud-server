@@ -1,11 +1,18 @@
 const express = require('express')
+const { MongoClient } = require('mongodb');
+const cors = require('cors')
+
 const app = express()
 const port = 5000
+
+//middleware 
+app.use(cors())
+app.use(express.json());
 
 //user : mydbuser1
 //pass : Nuoff9ryHIHVZ976
 
-const { MongoClient } = require('mongodb');
+
 const uri = "mongodb+srv://mydbuser1:Nuoff9ryHIHVZ976@cluster0.vljpp.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
@@ -15,15 +22,24 @@ async function run() {
     await client.connect();
     const database = client.db("foodMaster");
     const usersCollection = database.collection("users");
-    // // create a document to insert
-    // const doc = {
-    //   name: "Special One",
-    //   email: "special@hotmail.com",
-    // }
-    // const result = await usersCollection.insertOne(doc);
-    // console.log(`A document was inserted with the _id: ${result.insertedId}`);
+    // get api 
+    app.get('/users', async(req, res) =>{
+      const cursor = usersCollection.find({});
+      const users = await cursor.toArray();
+      res.send(users);
+    })
+
+    // POST method route
+    app.post('/users', async (req, res) => {
+      const newUser = req.body;
+       const result = await usersCollection.insertOne(newUser);
+      // console.log("got new user", req.body);
+      // console.log('added user',result);
+      res.json(result)
+    })
+
   } finally {
-    await client.close();
+    // await client.close(); 
   }
 }
 run().catch(console.dir);
