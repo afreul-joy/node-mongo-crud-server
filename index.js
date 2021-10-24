@@ -29,8 +29,16 @@ async function run() {
       const users = await cursor.toArray();
       res.send(users);
     })
+    //
+    app.get('/users/:id', async (req, res) => {
+      const id = req.params.id
+      const query = { _id: ObjectId(id) };
+      const user= await usersCollection.findOne(query);
+      console.log('load user with id : ', id);
+      res.send(user)
+    })
 
-    // POST method route
+    // POST API
     app.post('/users', async (req, res) => {
       const newUser = req.body;
        const result = await usersCollection.insertOne(newUser);
@@ -39,7 +47,7 @@ async function run() {
       res.json(result)
     })
     // delete api
-    app.delete('users/:id', async (req, res) => {
+    app.delete('/users/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await usersCollection.deleteOne(query);
